@@ -304,6 +304,30 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(${PROJECT_NAME}_tests)
 target_sources(${PROJECT_NAME}_tests
-    PRIVATE
-        src/test/cpp/tests.cpp
+    PRIVATE "src/test/cpp/utils.hpp"
+            "src/test/cpp/tests.cpp"
 )
+target_link_directories(${PROJECT_NAME}_tests
+    PRIVATE "${PACKAGES_PREFIX}/zlib-1.2.11/bin"
+            "${PACKAGES_PREFIX}/libpng-1.6.37/bin"
+)
+target_link_libraries(${PROJECT_NAME}_tests
+    PRIVATE "libzlib.dll"
+            "libpng16.dll"
+)
+target_include_directories(${PROJECT_NAME}_tests
+    PRIVATE "${PACKAGES_PREFIX}/zlib-1.2.11/include"
+            "${PACKAGES_PREFIX}/libpng-1.6.37/include"
+            "${PACKAGES_PREFIX}/pngpp-0.2.9/include"
+)
+
+add_custom_target(${PROJECT_NAME}_tests_copy_binaries
+    COMMAND ${CMAKE_COMMAND} -E copy ${PACKAGES_PREFIX}/zlib-1.2.11/bin/libzlib.dll ${CMAKE_BINARY_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy ${PACKAGES_PREFIX}/libpng-1.6.37/bin/libpng16.dll ${CMAKE_BINARY_DIR}
+)
+
+add_dependencies(${PROJECT_NAME}_tests ${PROJECT_NAME}_tests_copy_binaries)
+
+enable_testing()
+
+add_test("${PROJECT_NAME}_tests" "${PROJECT_NAME}_tests" "test_1")
